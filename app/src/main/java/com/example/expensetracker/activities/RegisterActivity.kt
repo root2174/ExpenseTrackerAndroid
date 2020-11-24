@@ -1,26 +1,34 @@
 package com.example.expensetracker.activities
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.expensetracker.R
+import com.example.expensetracker.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
+    private lateinit var fullName: EditText
+    private lateinit var phone: EditText
     private lateinit var email: EditText
     private lateinit var password: EditText
     private lateinit var register: Button
     private lateinit var goToLogin: TextView
 
+
     private lateinit var auth: FirebaseAuth
+
+    private val database = Firebase.database.reference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +37,8 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
         auth = Firebase.auth
 
         // Finding Views
+        fullName = findViewById(R.id.fullName)
+        phone = findViewById(R.id.phone)
         email = findViewById(R.id.register_email)
         password = findViewById(R.id.register_password)
         register = findViewById(R.id.register_button)
@@ -49,6 +59,17 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
             R.id.register_button -> {
                 var formOk = true
+
+                if (fullName.text.isEmpty()) {
+                    fullName.error = "Name cannot be empty!"
+                    formOk = false
+                }
+
+                if (phone.text.isEmpty()) {
+                    phone.error = "Phone cannot be empty!"
+                    formOk = false
+                }
+
                 if (email.text.isEmpty()) {
                     email.error = "Email cannot be empty!"
                     formOk = false
@@ -65,6 +86,8 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                     auth.createUserWithEmailAndPassword(emailText, passwordText)
                         .addOnCompleteListener(this) { task ->
                             if (task.isSuccessful) {
+                                val user = User(emailText, fullName.text.toString().trim(), phone.text.toString().trim())
+                                database.child("users").child(emailText.substringBefore('.')).setValue(user)
                                 Toast.makeText(this, "User created!", Toast.LENGTH_SHORT)
                                     .show()
                             } else {
