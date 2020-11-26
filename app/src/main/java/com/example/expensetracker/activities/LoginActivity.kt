@@ -42,7 +42,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         when(v?.id) {
             R.id.login_goToRegister -> {
                 val registerActivityIntent = Intent(this, RegisterActivity::class.java)
-                finish()
                 startActivity(registerActivityIntent)
             }
 

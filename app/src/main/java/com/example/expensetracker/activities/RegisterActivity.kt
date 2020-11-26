@@ -12,7 +12,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
@@ -27,14 +27,16 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
 
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: FirebaseDatabase
 
-    private val database = Firebase.database.reference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
+        //FIREBASE
         auth = Firebase.auth
+        database = Firebase.database
 
         // Finding Views
         fullName = findViewById(R.id.fullName)
@@ -86,10 +88,18 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener {
                     auth.createUserWithEmailAndPassword(emailText, passwordText)
                         .addOnCompleteListener(this) { task ->
                             if (task.isSuccessful) {
-                                val user = User(emailText, fullName.text.toString().trim(), phone.text.toString().trim())
-                                database.child("users").child(emailText.substringBefore('.')).setValue(user)
+                                val userRef = database.getReference("users")
+                                val user = User(emailText,
+                                    fullName.text.toString().trim(),
+                                    phone.text.toString().trim(),
+                                    null,
+                                    null,
+                                )
+                                val uid = auth.currentUser?.uid
+                                userRef.child(uid!!).setValue(user)
                                 Toast.makeText(this, "User created!", Toast.LENGTH_SHORT)
                                     .show()
+                                finish()
                             } else {
                                 Toast.makeText(this, "Could not create user!", Toast.LENGTH_SHORT)
                                     .show()
