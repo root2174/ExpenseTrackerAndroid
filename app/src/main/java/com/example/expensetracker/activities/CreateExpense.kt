@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.example.expensetracker.R
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.models.User
@@ -60,21 +61,28 @@ class CreateExpense : AppCompatActivity() {
                     expenseValueEditText.text.toString().toDouble())
 
                 var userExpenses = user.expenses
-
-                if (userExpenses == null) {
-                    userExpenses = mutableListOf(newExpense)
-                    val userCopy = user.copy(expenses = userExpenses)
-                    Log.i("new user", userCopy.toString())
-                    usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
-                    finish()
-                } else {
-                    userExpenses.add(newExpense)
-                    val userCopy = user.copy(expenses = userExpenses)
-                    usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
-                    finish()
+                try {
+                    if (userExpenses == null) {
+                        userExpenses = mutableListOf(newExpense)
+                        val userCopy = user.copy(expenses = userExpenses)
+                        Log.i("new user", userCopy.toString())
+                        usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
+                        Toast.makeText(this, "Added new expense!", Toast.LENGTH_SHORT)
+                            .show()
+                        finish()
+                    } else {
+                        userExpenses.add(newExpense)
+                        val userCopy = user.copy(expenses = userExpenses)
+                        usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
+                        Toast.makeText(this, "Added new expense!", Toast.LENGTH_SHORT)
+                            .show()
+                        finish()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Could not add new expense!", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
-
         }
     }
 }

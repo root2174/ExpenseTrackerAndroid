@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.example.expensetracker.R
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.models.Income
@@ -59,18 +60,26 @@ class CreateIncome : AppCompatActivity() {
                     incomeValueEditText.text.toString().toDouble())
 
                 var userIncome = user.income
-
-                if (userIncome == null) {
-                    userIncome = mutableListOf(newIncome)
-                    val userCopy = user.copy(income = userIncome)
-                    Log.i("new user", userCopy.toString())
-                    usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
-                    finish()
-                } else {
-                    userIncome.add(newIncome)
-                    val userCopy = user.copy(income = userIncome)
-                    usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
-                    finish()
+                try {
+                    if (userIncome == null) {
+                        userIncome = mutableListOf(newIncome)
+                        val userCopy = user.copy(income = userIncome)
+                        Log.i("new user", userCopy.toString())
+                        usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
+                        Toast.makeText(this, "Added new income!", Toast.LENGTH_SHORT)
+                            .show()
+                        finish()
+                    } else {
+                        userIncome.add(newIncome)
+                        val userCopy = user.copy(income = userIncome)
+                        usersRef.child(auth.currentUser?.uid!!).setValue(userCopy)
+                        Toast.makeText(this, "Added new income!", Toast.LENGTH_SHORT)
+                            .show()
+                        finish()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Could not add new income!", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
